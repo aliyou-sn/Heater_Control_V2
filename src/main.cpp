@@ -306,7 +306,7 @@ void GetTemp(void *parameter){
    
     }
   
-  // vTaskDelay(1000 / portTICK_PERIOD_MS);
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
 
