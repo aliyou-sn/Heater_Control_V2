@@ -147,13 +147,22 @@ void displayTimeTask(void *Parameters) {
 
 
 
-void adjustTriac(int triacPin, float PID_value) {
+void adjustTriac1(float PID_value) {
     int firingDelay = map(PID_value, 0, 10, 0, 7400); // Map PID to firing delay
     delayMicroseconds(firingDelay); 
-    digitalWrite(triacPin, HIGH);
+    digitalWrite(triac1Pin, HIGH);
     delayMicroseconds(10);
-    digitalWrite(triacPin, LOW);
+    digitalWrite(triac1Pin, LOW);
 }
+
+void adjustTriac2(float PID_value) {
+    int firingDelay = map(PID_value, 0, 10, 0, 7400); // Map PID to firing delay
+    delayMicroseconds(firingDelay); 
+    digitalWrite(triac2Pin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(triac2Pin, LOW);
+}
+
 
 
 //Function to get current temperature of grill and warmer every 1 sec
@@ -201,7 +210,7 @@ void GetTemp(void *parameter){
 
       if (zeroCrossDetected) 
       {
-          adjustTriac(triac1Pin, PID_value1);
+          adjustTriac1(PID_value1);
       }
     }
  
@@ -226,7 +235,7 @@ void GetTemp(void *parameter){
 
       if (zeroCrossDetected) 
       {
-        adjustTriac(triac2Pin, PID_value2);
+        adjustTriac2(PID_value2);
       }
     }
 
@@ -258,7 +267,7 @@ void GetTemp(void *parameter){
       lastTime1 = currentTime;
       if (zeroCrossDetected) 
       {
-        adjustTriac(triac1Pin, PID_value1);
+        adjustTriac1(PID_value1);
       }
     }
    
@@ -283,7 +292,7 @@ void GetTemp(void *parameter){
 
       if (zeroCrossDetected) 
       {
-        adjustTriac(triac2Pin, PID_value2);
+        adjustTriac2(PID_value2);
       }
     }
 
@@ -297,7 +306,7 @@ void GetTemp(void *parameter){
    
     }
   
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  // vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
 
