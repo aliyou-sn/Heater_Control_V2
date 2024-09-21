@@ -181,63 +181,13 @@ void GetTemp(void *parameter){
   WarmerTemperatureF = (0.5556*WarmerTemperatureC) + 32;
 
 
-  unsigned long currentTime = millis();
-  float elapsedTime1 = (currentTime - lastTime1) / 1000.0; // For Grill
-  float elapsedTime2 = (currentTime - lastTime2) / 1000.0; // For Warmer
-
+ 
 
   char buf1[_UI_TEMPORARY_STRING_BUFFER_SIZE];
   char buf2[_UI_TEMPORARY_STRING_BUFFER_SIZE];
   if(Fahrenheit)
   {
 
-    if(digitalRead(Grill) == HIGH && GrillTemperatureF < GrillSetTemperatureF - 5)
-    {
-
-      float error1 = GrillSetTemperatureF - GrillTemperatureF; // Error for Grill
-      integral1 += error1 * elapsedTime1; // Integral term for Grill
-      float derivative1 = (error1 - previous_error1) / elapsedTime1; // Derivative term for Grill
-
-      // PID output for Grill
-      PID_p1 = kp1 * error1;
-      PID_i1 = ki1 * integral1;
-      PID_d1 = kd1 * derivative1;
-      PID_value1 = PID_p1 + PID_i1 + PID_d1;
-
-      previous_error1 = error1;
-      lastTime1 = currentTime;
-
-
-      if (zeroCrossDetected) 
-      {
-          adjustTriac1(PID_value1);
-      }
-    }
- 
-
-
-    if(digitalRead(Warmer) == HIGH && WarmerTemperatureF < WarmerSetTemperatureF - 5)
-    {
-
-
-      float error2 = WarmerSetTemperatureF - WarmerTemperatureF; // Error for Warmer
-      integral2 += error2 * elapsedTime2; // Integral term for Warmer
-      float derivative2 = (error2 - previous_error2) / elapsedTime2; // Derivative term for Warmer
-
-      // PID output for Warmer
-      PID_p2 = kp2 * error2;
-      PID_i2 = ki2 * integral2;
-      PID_d2 = kd2 * derivative2;
-      PID_value2 = PID_p2 + PID_i2 + PID_d2;
-
-      previous_error2 = error2;
-      lastTime2 = currentTime;
-
-      if (zeroCrossDetected) 
-      {
-        adjustTriac2(PID_value2);
-      }
-    }
 
     lv_snprintf(buf1, sizeof(buf1), "%d", GrillTemperatureF);
     lv_label_set_text(ui_GCurrentTempLabel, buf1);
@@ -248,53 +198,6 @@ void GetTemp(void *parameter){
   }
   else
   {
-
-
-    if(digitalRead(Grill) == HIGH && GrillTemperatureC < GrillSetTemperatureC - 5)
-    {
-
-      float error1 = GrillSetTemperatureC - GrillTemperatureC; // Error for Grill
-      integral1 += error1 * elapsedTime1; // Integral term for Grill
-      float derivative1 = (error1 - previous_error1) / elapsedTime1; // Derivative term for Grill
-
-      // PID output for Grill
-      PID_p1 = kp1 * error1;
-      PID_i1 = ki1 * integral1;
-      PID_d1 = kd1 * derivative1;
-      PID_value1 = PID_p1 + PID_i1 + PID_d1;
-
-      previous_error1 = error1;
-      lastTime1 = currentTime;
-      if (zeroCrossDetected) 
-      {
-        adjustTriac1(PID_value1);
-      }
-    }
-   
-
-    if(digitalRead(Warmer) == HIGH && WarmerTemperatureC < WarmerSetTemperatureC - 5)
-    {
-
-
-      float error2 = WarmerSetTemperatureC - WarmerTemperatureC; // Error for Warmer
-      integral2 += error2 * elapsedTime2; // Integral term for Warmer
-      float derivative2 = (error2 - previous_error2) / elapsedTime2; // Derivative term for Warmer
-
-      // PID output for Warmer
-      PID_p2 = kp2 * error2;
-      PID_i2 = ki2 * integral2;
-      PID_d2 = kd2 * derivative2;
-      PID_value2 = PID_p2 + PID_i2 + PID_d2;
-
-      previous_error2 = error2;
-      lastTime2 = currentTime;
-
-
-      if (zeroCrossDetected) 
-      {
-        adjustTriac2(PID_value2);
-      }
-    }
 
 
     lv_snprintf(buf1, sizeof(buf1), "%d", GrillTemperatureC);
@@ -309,7 +212,122 @@ void GetTemp(void *parameter){
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
+void PID_Control(void *parameter)
+{
+  unsigned long currentTime = millis();
+  float elapsedTime1 = (currentTime - lastTime1) / 1000.0; // For Grill
+  float elapsedTime2 = (currentTime - lastTime2) / 1000.0; // For Warmer
 
+  for(;;)
+  {
+    if(Fahrenheit)
+    {
+          if(digitalRead(Grill) == HIGH && GrillTemperatureF < GrillSetTemperatureF - 5)
+          {
+
+            float error1 = GrillSetTemperatureF - GrillTemperatureF; // Error for Grill
+            integral1 += error1 * elapsedTime1; // Integral term for Grill
+            float derivative1 = (error1 - previous_error1) / elapsedTime1; // Derivative term for Grill
+
+            // PID output for Grill
+            PID_p1 = kp1 * error1;
+            PID_i1 = ki1 * integral1;
+            PID_d1 = kd1 * derivative1;
+            PID_value1 = PID_p1 + PID_i1 + PID_d1;
+
+            previous_error1 = error1;
+            lastTime1 = currentTime;
+
+
+            if (zeroCrossDetected) 
+            {
+                adjustTriac1(PID_value1);
+            }
+          }
+      
+
+
+          if(digitalRead(Warmer) == HIGH && WarmerTemperatureF < WarmerSetTemperatureF - 5)
+          {
+
+
+            float error2 = WarmerSetTemperatureF - WarmerTemperatureF; // Error for Warmer
+            integral2 += error2 * elapsedTime2; // Integral term for Warmer
+            float derivative2 = (error2 - previous_error2) / elapsedTime2; // Derivative term for Warmer
+
+            // PID output for Warmer
+            PID_p2 = kp2 * error2;
+            PID_i2 = ki2 * integral2;
+            PID_d2 = kd2 * derivative2;
+            PID_value2 = PID_p2 + PID_i2 + PID_d2;
+
+            previous_error2 = error2;
+            lastTime2 = currentTime;
+
+            if (zeroCrossDetected) 
+            {
+              adjustTriac2(PID_value2);
+            }
+          }
+
+
+    }
+    else
+    {
+
+
+      if(digitalRead(Grill) == HIGH && GrillTemperatureC < GrillSetTemperatureC - 5)
+      {
+
+        float error1 = GrillSetTemperatureC - GrillTemperatureC; // Error for Grill
+        integral1 += error1 * elapsedTime1; // Integral term for Grill
+        float derivative1 = (error1 - previous_error1) / elapsedTime1; // Derivative term for Grill
+
+        // PID output for Grill
+        PID_p1 = kp1 * error1;
+        PID_i1 = ki1 * integral1;
+        PID_d1 = kd1 * derivative1;
+        PID_value1 = PID_p1 + PID_i1 + PID_d1;
+
+        previous_error1 = error1;
+        lastTime1 = currentTime;
+        if (zeroCrossDetected) 
+        {
+          adjustTriac1(PID_value1);
+        }
+      }
+    
+
+      if(digitalRead(Warmer) == HIGH && WarmerTemperatureC < WarmerSetTemperatureC - 5)
+      {
+
+
+        float error2 = WarmerSetTemperatureC - WarmerTemperatureC; // Error for Warmer
+        integral2 += error2 * elapsedTime2; // Integral term for Warmer
+        float derivative2 = (error2 - previous_error2) / elapsedTime2; // Derivative term for Warmer
+
+        // PID output for Warmer
+        PID_p2 = kp2 * error2;
+        PID_i2 = ki2 * integral2;
+        PID_d2 = kd2 * derivative2;
+        PID_value2 = PID_p2 + PID_i2 + PID_d2;
+
+        previous_error2 = error2;
+        lastTime2 = currentTime;
+
+
+        if (zeroCrossDetected) 
+        {
+          adjustTriac2(PID_value2);
+        }
+      }
+
+    }
+
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+
+  }
+}
 void IRAM_ATTR zeroCrossISR() {
   zeroCrossDetected = true;
   lastZeroCrossTime = micros();
@@ -378,6 +396,9 @@ void setup()
 
     //Current temperature task
     xTaskCreate(displayTimeTask,"display Time", 5000, NULL, 2, NULL);
+
+     //PID Control task
+    xTaskCreate(PID_Control,"PID Control", 5000, NULL, 3, NULL);
 
     Serial.println( "Setup done" );
 
