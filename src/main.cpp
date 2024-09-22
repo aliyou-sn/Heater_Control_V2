@@ -398,7 +398,8 @@ void setup()
     xTaskCreate(displayTimeTask,"display Time", 5000, NULL, 2, NULL);
 
      //PID Control task
-    xTaskCreate(PID_Control,"PID Control", 5000, NULL, 3, NULL);
+    // xTaskCreate(PID_Control,"PID Control", 5000, NULL, 3, NULL);
+    xTaskCreatePinnedToCore(PID_Control, "PID control", 5000, NULL, 2, NULL, 1);
 
     Serial.println( "Setup done" );
 
@@ -417,5 +418,5 @@ void setup()
 void loop()
 {
     lv_timer_handler(); /* let the GUI do its work */
-    // delay(5);
+    vTaskDelay(5 / portTICK_PERIOD_MS);
 }
