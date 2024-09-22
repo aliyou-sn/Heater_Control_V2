@@ -212,14 +212,14 @@ void GetTemp(void *parameter){
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
-void PID_Control(void *parameter)
+void PID_Control()
 {
   unsigned long currentTime = millis();
   float elapsedTime1 = (currentTime - lastTime1) / 1000.0; // For Grill
   float elapsedTime2 = (currentTime - lastTime2) / 1000.0; // For Warmer
 
-  for(;;)
-  {
+  // for(;;)
+  // {
     if(Fahrenheit)
     {
           if(digitalRead(Grill) == HIGH && GrillTemperatureF < GrillSetTemperatureF - 5)
@@ -324,9 +324,9 @@ void PID_Control(void *parameter)
 
     }
 
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    // vTaskDelay(10 / portTICK_PERIOD_MS);
 
-  }
+  // }
 }
 void IRAM_ATTR zeroCrossISR() {
   zeroCrossDetected = true;
@@ -398,8 +398,7 @@ void setup()
     xTaskCreate(displayTimeTask,"display Time", 5000, NULL, 2, NULL);
 
      //PID Control task
-    // xTaskCreate(PID_Control,"PID Control", 5000, NULL, 3, NULL);
-    xTaskCreatePinnedToCore(PID_Control, "PID control", 5000, NULL, 2, NULL, 1);
+    // xTaskCreate(PID_Control,"PID Control", 5000, NULL, 1, NULL);
 
     Serial.println( "Setup done" );
 
@@ -418,5 +417,6 @@ void setup()
 void loop()
 {
     lv_timer_handler(); /* let the GUI do its work */
-    vTaskDelay(5 / portTICK_PERIOD_MS);
+    PID_Control();
+    // delay(5);
 }
