@@ -5,8 +5,6 @@
 #include <time.h>
 #include "MAX6675.h"
 
-
-
 // Actual Temperature for Grill and warmer
 //In celcius
 int16_t GrillTemperatureC;
@@ -35,7 +33,6 @@ int triac2Pin = 22;
 int zeroCrossPin = 5; // Zero-crossing detection pin
 volatile bool zeroCrossDetected = false;
 volatile unsigned long lastZeroCrossTime = 0;
-
 
 
 // PID variables for Grill
@@ -145,8 +142,6 @@ void displayTimeTask(void *Parameters) {
     }
 }
 
-
-
 void adjustTriac1(float PID_value) {
     int firingDelay = map(PID_value, 0, 10, 0, 7400); // Map PID to firing delay
     delayMicroseconds(firingDelay); 
@@ -163,8 +158,6 @@ void adjustTriac2(float PID_value) {
     digitalWrite(triac2Pin, LOW);
 }
 
-
-
 //Function to get current temperature of grill and warmer every 1 sec
 void GetTemp(void *parameter){
   for(;;)
@@ -180,15 +173,10 @@ void GetTemp(void *parameter){
   GrillTemperatureF = (0.5556*GrillTemperatureC) + 32;
   WarmerTemperatureF = (0.5556*WarmerTemperatureC) + 32;
 
-
- 
-
   char buf1[_UI_TEMPORARY_STRING_BUFFER_SIZE];
   char buf2[_UI_TEMPORARY_STRING_BUFFER_SIZE];
   if(Fahrenheit)
   {
-
-
     lv_snprintf(buf1, sizeof(buf1), "%d", GrillTemperatureF);
     lv_label_set_text(ui_GCurrentTempLabel, buf1);
     lv_snprintf(buf2, sizeof(buf2), "%d", WarmerTemperatureF);
@@ -198,8 +186,6 @@ void GetTemp(void *parameter){
   }
   else
   {
-
-
     lv_snprintf(buf1, sizeof(buf1), "%d", GrillTemperatureC);
     lv_label_set_text(ui_GCurrentTempLabel, buf1);
     lv_snprintf(buf2, sizeof(buf2), "%d", WarmerTemperatureC);
@@ -212,14 +198,14 @@ void GetTemp(void *parameter){
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
-void PID_Control()
+void PID_Control(void *param)
 {
   unsigned long currentTime = millis();
   float elapsedTime1 = (currentTime - lastTime1) / 1000.0; // For Grill
   float elapsedTime2 = (currentTime - lastTime2) / 1000.0; // For Warmer
 
-  // for(;;)
-  // {
+  for(;;)
+  {
     if(Fahrenheit)
     {
           if(digitalRead(Grill) == HIGH && GrillTemperatureF < GrillSetTemperatureF - 5)
@@ -241,7 +227,7 @@ void PID_Control()
 
             if (zeroCrossDetected) 
             {
-                adjustTriac1(PID_value1);
+                // adjustTriac1(PID_value1);
             }
           }
       
@@ -266,7 +252,7 @@ void PID_Control()
 
             if (zeroCrossDetected) 
             {
-              adjustTriac2(PID_value2);
+              // adjustTriac2(PID_value2);
             }
           }
 
@@ -293,7 +279,7 @@ void PID_Control()
         lastTime1 = currentTime;
         if (zeroCrossDetected) 
         {
-          adjustTriac1(PID_value1);
+          // adjustTriac1(PID_value1);
         }
       }
     
@@ -318,15 +304,15 @@ void PID_Control()
 
         if (zeroCrossDetected) 
         {
-          adjustTriac2(PID_value2);
+          // adjustTriac2(PID_value2);
         }
       }
 
     }
 
-    // vTaskDelay(10 / portTICK_PERIOD_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
-  // }
+  }
 }
 void IRAM_ATTR zeroCrossISR() {
   zeroCrossDetected = true;
@@ -392,13 +378,13 @@ void setup()
 
 
     //Current temperature task
-    xTaskCreate(GetTemp,"Update temperature", 5000, NULL, 2, NULL);
+    xTaskCreate(GetTemp,"Update temperature", 3000, NULL, 2, NULL);
 
     //Current temperature task
-    xTaskCreate(displayTimeTask,"display Time", 5000, NULL, 2, NULL);
+    xTaskCreate(displayTimeTask,"display Time", 3000, NULL, 2, NULL);
 
      //PID Control task
-    // xTaskCreate(PID_Control,"PID Control", 5000, NULL, 1, NULL);
+    // xTaskCreate(PID_Control,"PID Control", 3000, NULL, 1, NULL);
 
     Serial.println( "Setup done" );
 
@@ -417,6 +403,4 @@ void setup()
 void loop()
 {
     lv_timer_handler(); /* let the GUI do its work */
-    PID_Control();
-    // delay(5);
 }
